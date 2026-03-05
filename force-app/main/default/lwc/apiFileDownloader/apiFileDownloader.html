@@ -1,0 +1,32 @@
+<template>
+    <lightning-card title="API File Processor" icon-name="standard:file">
+        <div class="slds-p-around_medium">
+            <lightning-button label="Process & Generate File" 
+                              variant="brand" 
+                              onclick={handleProcessClick} 
+                              class="slds-m-bottom_medium">
+            </lightning-button>
+
+            <template if:true={fileLogs}>
+                <table class="slds-table slds-table_bordered">
+                    <thead>
+                        <tr>
+                            <th>Created Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={fileLogs} for:item="log">
+                            <tr key={log.Id}>
+                                <td><lightning-formatted-date-time value={log.CreatedDate}></lightning-formatted-date-time></td>
+                                <td>
+                                    <a href={log.File_URL__c} target="_blank">Download File</a>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+        </div>
+    </lightning-card>
+</template>
