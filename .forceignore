@@ -1,0 +1,12 @@
+# SFDX metadata ignores
+**/.sf/**
+**/.sfdx/**
+**/.localdevserver/**
+
+# OS / tooling
+.DS_Store
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
