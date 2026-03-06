@@ -1,0 +1,182 @@
+/* ================= REMOVE CUSTOM CARD OVERRIDES ================= */
+lightning-card {
+    background: white;
+}
+
+lightning-card .slds-card {
+    box-shadow: none;
+    border: 1px solid #dddbda;
+}
+
+/* ================= HOST ================= */
+:host {
+    display: block;
+    padding: 20px;
+    background-color: #f3f2f2; /* Standard Salesforce page background */
+    box-sizing: border-box;
+}
+
+/* ================= HEADER ================= */
+.header {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #080707;
+}
+
+.actions {
+    position: absolute;
+    right: 0;
+}
+
+/* ================= DIVIDER ================= */
+.divider {
+    border-top: 1px solid #dddbda;
+    margin: 10px 0;
+}
+
+/* ================= SOURCE OBJECT ================= */
+.source-object {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 0;
+    font-weight: 500;
+}
+
+.object-dropdown {
+    width: 300px;
+}
+
+/* ================= MAIN CONTAINER ================= */
+.main-container {
+    display: flex;
+    gap: 20px;
+    padding: 20px 0;
+    align-items: stretch;
+}
+
+/* ================= LEFT PANEL ================= */
+.left-panel {
+    width: 40%;
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    padding: 15px;
+    min-height: 500px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.left-panel h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+/* ================= RIGHT PANEL ================= */
+.right-panel {
+    width: 60%;
+    background: #ffffff;
+    border: 1px dashed #dddbda;
+    border-radius: 4px;
+    padding: 20px;
+    min-height: 500px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.right-panel h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+/* ================= SECTION HEADERS ================= */
+.section-header {
+    background: #f3f2f2;
+    padding: 8px 10px;
+    font-weight: 600;
+    margin-top: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.section-header:hover {
+    background: #ecebea;
+}
+
+/* ================= RELATED OBJECT STYLE ================= */
+.section-header[data-obj] {
+    margin-left: 6px;
+}
+
+/* ================= FIELD ITEMS ================= */
+.field-item {
+    padding: 6px 10px;
+    margin: 4px 0;
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    cursor: grab;
+    font-size: 13px;
+    margin-left: 15px;
+}
+
+.field-item:hover {
+    background: #f3f2f2;
+}
+
+/* ================= MAPPED ITEMS ================= */
+.mapped-item {
+    padding: 10px;
+    margin: 8px 0;
+    background: #f3f2f2;
+    border-left: 4px solid #0176d3; /* Salesforce brand blue */
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+/* ================= INPUT SPACING ================= */
+lightning-input {
+    margin-bottom: 10px;
+}
+
+lightning-combobox {
+    margin-bottom: 10px;
+}
+
+/* ================= BUTTON SPACING ================= */
+lightning-button {
+    margin-left: 5px;
+}
+
+/* ================= JSON SECTION ================= */
+.json-section {
+    margin-top: 15px;
+}
+
+/* ================= JSON BOX ================= */
+.json-box {
+    margin-top: 10px;
+    padding: 12px;
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
