@@ -1,0 +1,65 @@
+name: Auto Review and Merge
+
+on:
+  pull_request:
+    types: [opened, reopened]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  add-reviewer:
+    name: Add Umesh-Vyas-EA as Reviewer
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Request review from Umesh-Vyas-EA
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: ['Umesh-Vyas-EA']
+            });
+            console.log('Added Umesh-Vyas-EA as reviewer');
+
+  auto-merge:
+    name: Auto Merge on Approval
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved'
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - name: Check if reviewer is Umesh-Vyas-EA
+        id: check-reviewer
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const review = context.payload.review;
+            const reviewer = review.user.login;
+            if (reviewer === 'Umesh-Vyas-EA') {
+              console.log('Approval from Umesh-Vyas-EA detected. Proceeding with merge.');
+              core.setOutput('should-merge', 'true');
+            } else {
+              console.log('Approval from different user. Skipping merge.');
+              core.setOutput('should-merge', 'false');
+            }
+
+      - name: Merge Pull Request
+        if: steps.check-reviewer.outputs.should-merge == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              merge_method: 'squash',
+              commit_title: `Merge PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}`,
+              commit_message: 'Auto-merged by GitHub Actions after Umesh-Vyas-EA approval'
+            });
+            console.log('Pull request merged successfully');
