@@ -1,0 +1,221 @@
+<template>
+    <lightning-card>
+
+        <!-- ================= HEADER ================= -->
+<div class="slds-grid slds-grid_align-center slds-p-around_small slds-border_bottom">
+    <div class="slds-text-heading_medium slds-text-title_bold">
+        Field Selection Configuration
+    </div>
+</div>
+
+            <div>
+                <lightning-button
+                    label="Save"
+                    variant="brand"
+                    onclick={handleSave}>
+                </lightning-button>
+
+                <lightning-button
+                    label="Cancel"
+                    variant="neutral"
+                    class="slds-m-left_small"
+                    onclick={handleCancel}>
+                </lightning-button>
+            </div>
+        </div>
+
+        <div class="slds-border_bottom"></div>
+
+        <!-- ================= SOURCE OBJECT ================= -->
+        <div class="slds-grid slds-grid_align-center slds-p-around_medium slds-gutters_small">
+
+            <div class="slds-text-title_bold slds-m-top_x-small">
+                Source Object:
+            </div>
+
+            <div style="width:300px;">
+                <lightning-combobox
+                    value={selectedObject}
+                    options={objectOptions}
+                    onchange={handleObjectChange}>
+                </lightning-combobox>
+            </div>
+
+        </div>
+
+        <div class="slds-border_bottom"></div>
+
+        <!-- ================= MAIN BODY ================= -->
+        <div class="slds-grid slds-gutters slds-p-around_medium">
+
+            <!-- ================= LEFT PANEL ================= -->
+            <div class="slds-col slds-size_2-of-5">
+
+                <div class="slds-box slds-theme_default slds-scrollable_y" style="max-height:600px;">
+
+                    <h3 class="slds-text-heading_small slds-m-bottom_small">
+                        Source Fields
+                    </h3>
+
+                    <lightning-input
+                        type="search"
+                        placeholder="Search Fields..."
+                        onchange={handleSearch}
+                        class="slds-m-bottom_small">
+                    </lightning-input>
+
+                    <!-- STANDARD -->
+                    <div class="slds-section__title slds-theme_shade slds-p-around_x-small slds-m-top_small"
+                         onclick={toggleStandard}>
+                        {standardIcon} Standard Fields
+                    </div>
+
+                    <template if:true={isStandardOpen}>
+                        <div class="slds-scrollable_y" style="max-height:200px;">
+                            <template for:each={visibleStandardFields} for:item="field">
+                                <div
+                                    key={field.apiName}
+                                    class="slds-box slds-p-around_x-small slds-m-vertical_x-small field-item"
+                                    draggable="true"
+                                    data-api={field.apiName}
+                                    ondragstart={handleDrag}>
+                                    {field.label}
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- CUSTOM -->
+                    <div class="slds-section__title slds-theme_shade slds-p-around_x-small slds-m-top_small"
+                         onclick={toggleCustom}>
+                        {customIcon} Custom Fields
+                    </div>
+
+                    <template if:true={isCustomOpen}>
+                        <div class="slds-scrollable_y" style="max-height:200px;">
+                            <template for:each={visibleCustomFields} for:item="field">
+                                <div
+                                    key={field.apiName}
+                                    class="slds-box slds-p-around_x-small slds-m-vertical_x-small field-item"
+                                    draggable="true"
+                                    data-api={field.apiName}
+                                    ondragstart={handleDrag}>
+                                    {field.label}
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- LOOKUP -->
+                    <div class="slds-section__title slds-theme_shade slds-p-around_x-small slds-m-top_small"
+                         onclick={toggleLookup}>
+                        {lookupIcon} Lookup Fields
+                    </div>
+
+                    <template if:true={isLookupOpen}>
+                        <div class="slds-scrollable_y" style="max-height:200px;">
+                            <template for:each={visibleLookupFields} for:item="field">
+                                <div
+                                    key={field.apiName}
+                                    class="slds-box slds-p-around_x-small slds-m-vertical_x-small field-item"
+                                    draggable="true"
+                                    data-api={field.apiName}
+                                    ondragstart={handleDrag}>
+                                    {field.label}
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- RELATED OBJECTS -->
+                    <div class="slds-section__title slds-theme_shade slds-p-around_x-small slds-m-top_small"
+                         onclick={toggleRelated}>
+                        {relatedIcon} Related Objects
+                    </div>
+
+                    <template if:true={isRelatedOpen}>
+                        <template for:each={relatedData} for:item="rel">
+
+                            <div
+                                key={rel.name}
+                                class="slds-p-around_x-small slds-theme_default slds-m-top_x-small"
+                                data-obj={rel.name}
+                                onclick={handleRelatedClick}>
+                                ► {rel.name}
+                            </div>
+
+                            <template if:true={rel.isOpen}>
+                                <template for:each={rel.fields} for:item="field">
+                                    <div
+                                        key={field.apiName}
+                                        class="slds-box slds-p-around_x-small slds-m-vertical_x-small slds-m-left_medium field-item"
+                                        draggable="true"
+                                        data-api={field.apiName}
+                                        data-parent={rel.name}
+                                        ondragstart={handleDrag}>
+                                        {field.label}
+                                    </div>
+                                </template>
+                            </template>
+
+                        </template>
+                    </template>
+
+                </div>
+            </div>
+
+            <!-- ================= RIGHT PANEL ================= -->
+            <div class="slds-col slds-size_3-of-5">
+
+                <div class="slds-box slds-theme_default slds-scrollable_y"
+                     style="min-height:500px; max-height:600px;"
+                     ondragover={allowDrop}
+                     ondrop={handleDrop}>
+
+                    <h3 class="slds-text-heading_small slds-m-bottom_small">
+                        Mapping Canvas
+                    </h3>
+
+                    <template for:each={mappedFields} for:item="field">
+                        <div
+                            key={field.uniqueKey}
+                            class="slds-box slds-theme_shade slds-m-bottom_small slds-grid slds-grid_align-spread">
+
+                            <span>
+                                <template if:true={field.parentObject}>
+                                    {field.parentObject}.
+                                </template>
+                                {field.label}
+                            </span>
+
+                            <lightning-button-icon
+                                icon-name="utility:delete"
+                                data-key={field.uniqueKey}
+                                onclick={handleDelete}>
+                            </lightning-button-icon>
+                        </div>
+                    </template>
+
+                    <!-- GENERATE JSON -->
+                    <div class="slds-m-top_medium">
+                        <lightning-button
+                            label="Generate JSON"
+                            variant="brand"
+                            onclick={generateJSON}>
+                        </lightning-button>
+                    </div>
+
+                    <!-- JSON OUTPUT -->
+                    <template if:true={generatedJSON}>
+                        <div class="slds-box slds-m-top_small slds-theme_default">
+                            <pre>{generatedJSON}</pre>
+                        </div>
+                    </template>
+
+                </div>
+            </div>
+
+        </div>
+
+    </lightning-card>
+</template>
