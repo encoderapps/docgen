@@ -248,7 +248,7 @@ export default class fieldMappingConsole extends LightningElement {
   // ================= SAVE =================
   handleSave() {
     if (!this.generatedJSON) {
-      this.showToast("Error", "Generate JSON first", "error");
+      this.showToast("Error", "Generate JSON first.", "error");
       return;
     }
 
