@@ -10,6 +10,7 @@
 	</types>-->
     <types>      
 		<members>TemplateGeneratorService</members>
+		<members>TemplateGeneratorServiceTest</members>
 		<name>ApexClass</name>
 	</types>
     
