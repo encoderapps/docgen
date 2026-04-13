@@ -1,44 +1,55 @@
 <template>
-    <lightning-card>
+
+    <div class="slds-box slds-theme_default slds-p-around_medium">
 
         <!-- ================= HEADER ================= -->
-<div class="slds-grid slds-grid_align-center slds-p-around_small slds-border_bottom">
-    <div class="slds-text-heading_medium slds-text-title_bold">
-        Field Selection Configuration
+<div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-p-bottom_small">
+
+    <!-- LEFT EMPTY -->
+    <div class="slds-size_1-of-3"></div>
+
+    <!-- CENTER TITLE -->
+    <div class="slds-size_1-of-3 slds-text-align_center">
+        <div class="slds-text-heading_medium slds-text-title_bold">
+            Field Selection Configuration
+        </div>
     </div>
+
+    <!-- RIGHT BUTTONS -->
+    <div class="slds-size_1-of-3 slds-text-align_right">
+        <lightning-button
+            label="Save"
+            variant="brand"
+            onclick={handleSave}>
+        </lightning-button>
+
+        <lightning-button
+            label="Cancel"
+            variant="neutral"
+            class="slds-m-left_small"
+            onclick={handleCancel}>
+        </lightning-button>
+    </div>
+
 </div>
 
-            <div>
-                <lightning-button
-                    label="Save"
-                    variant="brand"
-                    onclick={handleSave}>
-                </lightning-button>
-
-                <lightning-button
-                    label="Cancel"
-                    variant="neutral"
-                    class="slds-m-left_small"
-                    onclick={handleCancel}>
-                </lightning-button>
-            </div>
-        </div>
-
-        <div class="slds-border_bottom"></div>
-
         <!-- ================= SOURCE OBJECT ================= -->
-        <div class="slds-grid slds-grid_align-center slds-p-around_medium slds-gutters_small">
+        <div class="slds-grid slds-grid_align-center slds-p-around_medium">
 
-            <div class="slds-text-title_bold slds-m-top_x-small">
-                Source Object:
-            </div>
+            <div class="slds-form-element slds-grid slds-grid_vertical-align-center">
 
-            <div style="width:300px;">
-                <lightning-combobox
-                    value={selectedObject}
-                    options={objectOptions}
-                    onchange={handleObjectChange}>
-                </lightning-combobox>
+                <label class="slds-form-element__label slds-m-right_small">
+                    Source Object:
+                </label>
+
+                <div class="slds-form-element__control" style="width:300px;">
+                    <lightning-combobox
+                        value={selectedObject}
+                        options={objectOptions}
+                        onchange={handleObjectChange}>
+                    </lightning-combobox>
+                </div>
+
             </div>
 
         </div>
@@ -217,5 +228,6 @@
 
         </div>
 
-    </lightning-card>
+    </div>
+
 </template>
