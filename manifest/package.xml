@@ -33,3 +33,22 @@
 	</types>
 	<version>66.0</version>
 </Package>
+
+    <types>
+        <members>FieldMappingController</members>
+        <members>FieldMappingControllerTest</members>
+        <name>ApexClass</name>
+    </types>
+
+    <types>
+        <members>fieldMapperConsole</members>
+        <name>LightningComponentBundle</name>
+    </types>
+
+    <types>
+        <members>Docgen_Console</members>
+        <name>FlexiPage</name>
+    </types>
+
+    <version>60.0</version>
+</Package>
