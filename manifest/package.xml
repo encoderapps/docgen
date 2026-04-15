@@ -37,14 +37,28 @@
         <members>FieldMappingControllerTest</members>
 		<members>TemplateGeneratorService</members>
 		<members>TemplateGeneratorServiceTest</members>
+		<members>DynamicPdfController</members>
+		<members>DynamicPdfControllerTest</members>
         <name>ApexClass</name>
     </types>
 
     <types>
         <members>fieldMapperConsole</members>
 		<members>templateOutputGenerator</members>
+		<members>dynamicPdfGenerator</members>
         <name>LightningComponentBundle</name>
     </types>
+
+	<types>
+		<members>Account-Account Layout</members>
+		<name>Layout</name>
+	</types>
+
+	<types>
+		<members>Account.Generate_PDF</members>
+		<name>QuickAction</name>
+	</types>
+
     <types>
         <members>Docgen_Console</members>
         <name>FlexiPage</name>

@@ -1,0 +1,47 @@
+.outer-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.inner-container {
+    width: 90%;
+    max-width: 900px;
+}
+
+
+
+
+
+.field-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+
+.field-label {
+    width: 200px;   /* FIXED width → alignment */
+    font-weight: 600;
+}
+
+
+.field-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
+.field-input-wrapper input {
+    width: 250px;
+}
+
+
+.edit-icon {
+    cursor: pointer;
+}
+
+.edit-icon svg {
+    fill: #0176d3;
+}
