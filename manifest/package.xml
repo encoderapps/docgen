@@ -43,7 +43,7 @@
     </types>
 
     <types>
-        <members>fieldMapperConsole</members>
+        <members>fieldMappingConsole</members>
 		<members>templateOutputGenerator</members>
 		<members>dynamicPdfGenerator</members>
         <name>LightningComponentBundle</name>
