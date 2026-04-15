@@ -10,3 +10,9 @@ npm-debug.log
 yarn-debug.log
 yarn-error.log
 
+#LWC Tests
+**/__tests__/**
+
+
+**/jsconfig.json
+**/.eslintrc.json
