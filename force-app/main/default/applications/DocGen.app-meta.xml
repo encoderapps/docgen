@@ -16,5 +16,4 @@
     <tabs>Template__c</tabs>
     <tabs>Template_Mapping_Output__c</tabs>
     <uiType>Lightning</uiType>
-    <utilityBar>DocGen_UtilityBar</utilityBar>
 </CustomApplication>
