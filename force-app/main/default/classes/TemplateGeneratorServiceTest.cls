@@ -1,6 +1,7 @@
 @isTest
 public class TemplateGeneratorServiceTest {
 
+
     @isTest
     static void testGenerateFromJunction() {
 
