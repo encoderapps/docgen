@@ -31,24 +31,32 @@
 		<members>Template__c</members>
 		<name>CustomTab</name>
 	</types>
-	<version>66.0</version>
-</Package>
 
     <types>
         <members>FieldMappingController</members>
         <members>FieldMappingControllerTest</members>
+		<members>TemplateGeneratorService</members>
+		<members>TemplateGeneratorServiceTest</members>
         <name>ApexClass</name>
     </types>
 
     <types>
         <members>fieldMapperConsole</members>
+		<members>templateOutputGenerator</members>
         <name>LightningComponentBundle</name>
     </types>
-
     <types>
         <members>Docgen_Console</members>
         <name>FlexiPage</name>
     </types>
-
-    <version>60.0</version>
+	<types>
+		<members>Template_Mapping_Output__c-Template Mapping Output Layout</members>
+		<name>Layout</name>
+	</types>
+	<types>
+		<members>Template_Mapping_Output__c.Generate_Template</members>
+		<name>QuickAction</name>
+	</types>
+    
+	<version>66.0</version>
 </Package>
