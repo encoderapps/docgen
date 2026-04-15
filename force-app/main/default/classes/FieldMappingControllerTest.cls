@@ -122,4 +122,5 @@ public class FieldMappingControllerTest {
         System.assertEquals(true, exceptionThrown, 'Exception should be thrown');
 
     }
+    
 }
