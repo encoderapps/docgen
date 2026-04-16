@@ -2,11 +2,16 @@ import { LightningElement, api, track } from 'lwc';
 import getTemplateByName from '@salesforce/apex/DynamicPdfController.getTemplateByName';
 import fetchDynamicRecord from '@salesforce/apex/DynamicPdfController.fetchDynamicRecord';
 import updateDynamicRecord from '@salesforce/apex/DynamicPdfController.updateDynamicRecord';
+import generateDocument from '@salesforce/apex/DynamicPdfController.generateDocument';
+
+import { publish, MessageContext } from 'lightning/messageService';
+import PDF_CHANNEL from '@salesforce/messageChannel/pdfMessageChannel__c';
+import { wire } from 'lwc';
 
 import { CloseActionScreenEvent } from 'lightning/actions';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
-export default class DynamicPdfGenerator extends LightningElement {
+export default class dynamicPdfGenerator extends LightningElement {
 
     @api recordId;
     @api objectApiName;
@@ -15,42 +20,47 @@ export default class DynamicPdfGenerator extends LightningElement {
     @track isLoading = true;
     @track errorMessage = '';
 
+    @track fileUrl;
+
     templateHtml = '';
     fieldRefs = [];
 
-    connectedCallback() {
+    @wire(MessageContext)
+      messageContext;
+
+    connectedCallback() { 
         this.initialize();
     }
 
-   async initialize() {
-    try {
-        const template = await getTemplateByName({ 
-            templateName: 'Sample Account' 
-        });
+    async initialize() {
+        try {
+            const template = await getTemplateByName({ 
+                templateName: 'Sample Account' 
+            });
 
-        this.templateHtml = template || '';
+            this.templateHtml = template || '';
 
-        if (!this.templateHtml) {
-            this.errorMessage = 'Template not found';
-            return;
+            if (!this.templateHtml) {
+                this.errorMessage = 'Template not found';
+                return;
+            }
+
+            this.fieldRefs = this.extractFieldReferences(this.templateHtml);
+
+            const dataMap = await fetchDynamicRecord({
+                objectApiName: this.objectApiName,
+                recordId: this.recordId,
+                fieldPaths: this.fieldRefs
+            });
+
+            this.finalHtml = this.replaceTemplate(this.templateHtml, dataMap);
+
+        } catch (error) {
+            this.errorMessage = error?.body?.message || error.message;
+        } finally {
+            this.isLoading = false;
         }
-
-        this.fieldRefs = this.extractFieldReferences(this.templateHtml);
-
-        const dataMap = await fetchDynamicRecord({
-            objectApiName: this.objectApiName,
-            recordId: this.recordId,
-            fieldPaths: this.fieldRefs
-        });
-
-        this.finalHtml = this.replaceTemplate(this.templateHtml, dataMap);
-
-    } catch (error) {
-        this.errorMessage = error?.body?.message || error.message;
-    } finally {
-        this.isLoading = false;
     }
-}
 
     extractFieldReferences(template) {
         const regex = /\{\!\s*([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+){0,2})\s*\}/g;
@@ -96,7 +106,6 @@ export default class DynamicPdfGenerator extends LightningElement {
 
                     const value = this.escapeHTML(dataMap[key] || '');
 
-                    
                     return `
                         <div class="field-row">
                             
@@ -148,6 +157,7 @@ export default class DynamicPdfGenerator extends LightningElement {
         inputs.forEach(input => input.removeAttribute('disabled'));
     }
 
+    // ✅ SAVE → stays open now
     handleSave() {
         const inputs = this.template.querySelectorAll('.editable-field');
         let fieldMap = {};
@@ -175,7 +185,7 @@ export default class DynamicPdfGenerator extends LightningElement {
                     })
                 );
 
-                this.dispatchEvent(new CloseActionScreenEvent());
+                // ❌ REMOVED CLOSE FROM HERE
 
             }, 300);
         })
@@ -190,10 +200,50 @@ export default class DynamicPdfGenerator extends LightningElement {
         });
     }
 
-    escapeHTML(str) {
-        return String(str)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;");
-    }
+    escapeHTML(value) {
+    if (!value) return '';
+
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+  handleGenerateDocument() {
+
+    generateDocument({
+        recordId: this.recordId,
+        objectApiName: this.objectApiName,
+        htmlContent: this.finalHtml
+    })
+    .then((result) => {
+
+        this.fileUrl = result;
+
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title: 'Success',
+                message: 'Document generated successfully!',
+                variant: 'success'
+            })
+        );
+
+        // 🔥 ONLY NEW LINE ADDED
+        publish(this.messageContext, PDF_CHANNEL, {
+            fileUrl: this.fileUrl
+        });
+
+    })
+    .catch(error => {
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title: 'Error',
+                message: error?.body?.message || 'Failed',
+                variant: 'error'
+            })
+        );
+    });
+}
 }

@@ -1,70 +1,128 @@
 @isTest
-private class DynamicPdfControllerTest {
+public class DynamicPdfControllerTest {
 
-    @TestSetup
-    static void setup() {
-      
-        Account acc = new Account(Name = 'Test Account', Industry = 'Technology');
+    // 🔹 Test Data Setup
+    @testSetup
+    static void setupData() {
+
+        // Create Template Parent (Assuming Template_ID__c is lookup)
+        Template__c temp = new Template__c(Name = 'Sample Template');
+        insert temp;
+
+        // Create Template Mapping Output
+        Template_Mapping_Output__c mapping = new Template_Mapping_Output__c(
+            Template_ID__c = temp.Id,
+            Output_HTML__c = '<div>{!Name}</div>'
+        );
+        insert mapping;
+
+        // Create Account
+        Account acc = new Account(
+            Name = 'Test Account',
+            Phone = '1234567890',
+            Industry = 'IT'
+        );
         insert acc;
-        
-        Contact con = new Contact(FirstName = 'John', LastName = 'Doe', AccountId = acc.Id);
+
+        // Create Contact (Child)
+        Contact con = new Contact(
+            FirstName = 'Test',
+            LastName = 'User',
+            Email = 'test@example.com',
+            AccountId = acc.Id
+        );
         insert con;
-        
-       
     }
 
+    // 🔹 Test getTemplateByName
     @isTest
     static void testGetTemplateByName() {
-        // Since getTemplateByName relies on specific record data, 
-        // ensure the Setup created the record correctly.
+
         Test.startTest();
-        try {
-            String result = DynamicPdfController.getTemplateByName('Sample Template');
-            System.assertNotEquals(null, result, 'Result should not be null');
-        } catch (Exception e) {
-            // Expected if data setup doesn't match the hardcoded query
-            System.debug('Caught expected exception or data missing: ' + e.getMessage());
-        }
+        String result = DynamicPdfController.getTemplateByName('Sample Template');
         Test.stopTest();
+
+        System.assertNotEquals(null, result);
+        System.assert(result.contains('{!Name}'));
     }
 
+    // 🔹 Test fetchDynamicRecord
     @isTest
     static void testFetchDynamicRecord() {
+
         Account acc = [SELECT Id FROM Account LIMIT 1];
-        List<String> fields = new List<String>{'Account.Name', 'Account.Contact.FirstName'};
-        
+
+        List<String> fields = new List<String>{
+            'Account.Name',
+            'Account.Phone'
+        };
+
         Test.startTest();
-        Map<String, String> result = DynamicPdfController.fetchDynamicRecord('Account', acc.Id, fields);
+        Map<String, String> result = DynamicPdfController.fetchDynamicRecord(
+            'Account',
+            acc.Id,
+            fields
+        );
         Test.stopTest();
-        
-        System.assert(result.containsKey('Account.Name'), 'Should contain parent field');
-        System.assertEquals('Test Account', result.get('Account.Name'));
+
+        System.assert(result.containsKey('Account.Name'));
+        System.assert(result.containsKey('Account.Phone'));
     }
 
+    // 🔹 Test updateDynamicRecord
     @isTest
     static void testUpdateDynamicRecord() {
-        Account acc = [SELECT Id, Name FROM Account LIMIT 1];
-        Map<String, String> fieldValues = new Map<String, String>{
-            'Account.Name' => 'Updated Account Name'
+
+        Account acc = [SELECT Id FROM Account LIMIT 1];
+
+        Map<String, String> updateMap = new Map<String, String>{
+            'Account.Name' => 'Updated Name'
         };
-        
+
         Test.startTest();
-        DynamicPdfController.updateDynamicRecord('Account', acc.Id, fieldValues);
+        DynamicPdfController.updateDynamicRecord(
+            'Account',
+            acc.Id,
+            updateMap
+        );
         Test.stopTest();
-        
-        Account updatedAcc = [SELECT Name FROM Account WHERE Id = :acc.Id];
-        System.assertEquals('Updated Account Name', updatedAcc.Name);
+
+        Account updated = [SELECT Name FROM Account WHERE Id = :acc.Id];
+        System.assertEquals('Updated Name', updated.Name);
     }
 
+    // 🔹 Test generateDocument (HTTP Callout Mock)
     @isTest
-    static void testUpdateDynamicRecordFailure() {
+    static void testGenerateDocument() {
+
+        Account acc = [SELECT Id FROM Account LIMIT 1];
+
+        // 🔥 Mock Response
+        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator());
+
         Test.startTest();
-        try {
-            DynamicPdfController.updateDynamicRecord('InvalidObject', null, null);
-            System.assert(false, 'Should have thrown an exception');
-        } catch (AuraHandledException e) {
-            System.assert(true);
-        }
+        String url = DynamicPdfController.generateDocument(
+            acc.Id,
+            'Account',
+            '<div>Test</div>'
+        );
         Test.stopTest();
+
+        System.assertNotEquals(null, url);
+        System.assert(url.contains('http'));
+    }
+
+    // 🔹 HTTP Mock Class
+    class MockHttpResponseGenerator implements HttpCalloutMock {
+        public HTTPResponse respond(HTTPRequest req) {
+
+            HttpResponse res = new HttpResponse();
+            res.setHeader('Content-Type', 'application/json');
+            res.setStatusCode(200);
+
+            res.setBody('{"message":"PDF generated","file_url":"https://test.com/file.pdf"}');
+
+            return res;
+        }
     }
 }

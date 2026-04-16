@@ -1,0 +1,20 @@
+<template>
+    <lightning-card>
+
+        <div class="slds-p-around_medium slds-text-align_center">
+
+            <p class="slds-text-heading_small slds-m-bottom_medium">
+                Click the below button to download your recently generated document.
+            </p>
+
+            <lightning-button
+                label="Download Pdf"
+                variant="brand"
+                onclick={handleDownload}
+                disabled={isDisabled}>
+            </lightning-button>
+
+        </div>
+
+    </lightning-card>
+</template>

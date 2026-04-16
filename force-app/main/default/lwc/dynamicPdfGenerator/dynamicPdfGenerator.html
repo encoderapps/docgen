@@ -1,23 +1,43 @@
 <template>
     <lightning-card>
-       <div class="slds-text-align_center slds-text-heading_medium slds-p-top_small">
-    Preview PDF
-</div>
+        <div class="slds-text-align_center slds-text-heading_medium slds-p-top_small">
+            Preview PDF
+        </div>
 
         <div class="slds-m-top_large"></div>
 
-        <template if:true={finalHtml}>
+       <template if:true={finalHtml}>
             <div class="outer-container">
                 <div class="inner-container output-container" lwc:dom="manual"></div>
             </div>
 
             <div class="slds-align_absolute-center slds-m-top_large">
+                
+                <!-- SAVE BUTTON -->
                 <lightning-button 
                     label="Save" 
                     variant="brand" 
                     onclick={handleSave}>
                 </lightning-button>
+
+                <!-- GENERATE DOCUMENT BUTTON -->
+                <lightning-button 
+                    label="Generate Document" 
+                    variant="brand"
+                    class="slds-m-left_medium"
+                    onclick={handleGenerateDocument}>
+                </lightning-button>
+
+                
+
             </div>
         </template>
-    </lightning-card>
+
+        <template if:true={errorMessage}>
+           <div style="color:red; padding:10px;">
+             Error: {errorMessage}
+            </div>
+        </template>
+        
+    </lightning-card> 
 </template>
