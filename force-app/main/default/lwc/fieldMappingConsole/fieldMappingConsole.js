@@ -16,6 +16,7 @@ export default class fieldMappingConsole extends LightningElement {
   @track isRelatedOpen = false;
 
   searchKey = "";
+  
 
   isStandardOpen = true;
   isCustomOpen = true;
