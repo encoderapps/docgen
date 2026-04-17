@@ -1,0 +1,49 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 04-17-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <lightning-card title="Run Template Batch">
+
+        <div class="slds-p-around_medium">
+
+            <!-- Template Dropdown -->
+            <lightning-combobox
+                label="Select Template"
+                value={selectedTemplate}
+                options={templateOptions}
+                onchange={handleTemplateChange}>
+            </lightning-combobox>
+
+            <!-- Object Dropdown -->
+            <lightning-combobox
+                label="Select Source Object"
+                value={selectedObject}
+                options={objectOptions}
+                onchange={handleObjectChange}>
+            </lightning-combobox>
+
+            <!-- Run Button -->
+            <div class="slds-m-top_medium">
+                <lightning-button
+                    label="Run Batch"
+                    variant="brand"
+                    onclick={handleRun}
+                    disabled={isLoading}>
+                </lightning-button>
+            </div>
+
+            <!-- Loading Spinner -->
+            <template if:true={isLoading}>
+                <div class="slds-m-top_medium slds-align_absolute-center">
+                    <lightning-spinner alternative-text="Processing..."></lightning-spinner>
+                </div>
+            </template>
+
+        </div>
+
+    </lightning-card>
+</template>
