@@ -5,7 +5,6 @@ import getRelatedObjects from "@salesforce/apex/FieldMappingController.getRelate
 import saveMappingConfig from "@salesforce/apex/FieldMappingController.saveMappingConfig";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 
-
 export default class fieldMappingConsole extends LightningElement {
   @track objectOptions = [];
   @track selectedObject;
