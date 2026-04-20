@@ -13,14 +13,17 @@
 
             <div class="slds-align_absolute-center slds-m-top_large">
                 
-                <!-- SAVE BUTTON -->
-                <lightning-button 
+                
+                <template if:true={isEditMode}>
+                 <lightning-button 
                     label="Save" 
                     variant="brand" 
                     onclick={handleSave}>
                 </lightning-button>
+                </template>
+              
 
-                <!-- GENERATE DOCUMENT BUTTON -->
+                
                 <lightning-button 
                     label="Generate Document" 
                     variant="brand"

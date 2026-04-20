@@ -133,7 +133,7 @@ public with sharing class DynamicPdfController {
         update record;
     }
 
-    @AuraEnabled
+@AuraEnabled
 public static String generateDocument(
     Id recordId,
     String objectApiName,

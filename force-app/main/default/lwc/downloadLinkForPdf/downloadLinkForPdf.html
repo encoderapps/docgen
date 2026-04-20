@@ -1,20 +1,24 @@
 <template>
-    <lightning-card>
+    <div class="slds-card slds-card_boundary">
 
-        <div class="slds-p-around_medium slds-text-align_center">
+        <div class="slds-card__body slds-card__body_inner">
 
-            <p class="slds-text-heading_small slds-m-bottom_medium">
-                Click the below button to download your recently generated document.
-            </p>
+            <div class="slds-text-align_center slds-p-around_medium">
 
-            <lightning-button
-                label="Download Pdf"
-                variant="brand"
-                onclick={handleDownload}
-                disabled={isDisabled}>
-            </lightning-button>
+                <p class="slds-text-heading_small slds-m-bottom_medium">
+                 <b> Please click the button below to download your recently generated document once the generation process is complete. </b>
+                </p>
+
+                <lightning-button
+                    label="Download Pdf"
+                    variant="brand"
+                    onclick={handleDownload}
+                    disabled={isDisabled}>
+                </lightning-button>
+
+            </div>
 
         </div>
 
-    </lightning-card>
+    </div>
 </template>

@@ -16,6 +16,11 @@ export default class dynamicPdfGenerator extends LightningElement {
     @api recordId;
     @api objectApiName;
 
+    @track isEditMode = false;
+
+    pendingEnable = false;
+    isListenerAttached = false;
+
     @track finalHtml = '';
     @track isLoading = true;
     @track errorMessage = '';
@@ -87,77 +92,77 @@ export default class dynamicPdfGenerator extends LightningElement {
         return Array.from(fields);
     }
 
-    replaceTemplate(template, dataMap) {
-        const regex = /\{\!\s*([a-zA-Z0-9_.]+)\s*\}/g;
+   replaceTemplate(template, dataMap) {
+    const regex = /\{\!\s*([a-zA-Z0-9_.]+)\s*\}/g;
 
-        return `
-            <div class="slds-box slds-theme_default slds-p-around_medium">
-                ${template.replace(regex, (match, ref) => {
+    return `
+        <div>
+            ${template.replace(regex, (match, ref) => {
 
-                    let key = ref;
+                let key = ref;
 
-                    if (!ref.includes('.')) {
-                        key = `${this.objectApiName}.${ref}`;
-                    }
+                if (!ref.includes('.')) {
+                    key = `${this.objectApiName}.${ref}`;
+                }
 
-                    if (ref.split('.').length === 2 && ref.split('.')[0] !== this.objectApiName) {
-                        key = ref;
-                    }
+                if (ref.split('.').length === 2 && ref.split('.')[0] !== this.objectApiName) {
+                    key = ref;
+                }
 
-                    const value = this.escapeHTML(dataMap[key] || '');
+                const value = this.escapeHTML(dataMap[key] || '');
 
-                    return `
-                        <div class="field-row">
-                            
-                           <div class="field-label"></div>
+                return (
+                    '<span style="display:inline-flex; align-items:center; gap:6px;">' +
 
-                            <div class="field-input-wrapper">
-                                <input  
-                                    type="text"
-                                    class="slds-input editable-field"
-                                    value="${value}"
-                                    data-field="${key}"
-                                    disabled
-                                />
+                        '<input ' +
+                            'type="text" ' +
+                            'class="editable-field" ' +
+                            'value="' + value + '" ' +
+                            'data-field="' + key + '" ' +
+                            'style="width:250px;padding:6px;border:1px solid #ccc;border-radius:4px;margin-left:8px;" ' +
+                            'disabled />' +
 
-                                <span class="edit-icon" title="Edit">
-                                    <svg class="slds-icon slds-icon_x-small" aria-hidden="true">
-                                        <use xlink:href="/_slds/icons/utility-sprite/svg/symbols.svg#edit"></use>
-                                    </svg>
-                                </span>
-                            </div>
+                        '<span class="edit-icon" title="Edit" style="cursor:pointer;">' +
+                            '<svg style="width:14px;height:14px;fill:#0176d3;" aria-hidden="true">' +
+                                '<use xlink:href="/_slds/icons/utility-sprite/svg/symbols.svg#edit"></use>' +
+                            '</svg>' +
+                        '</span>' +
 
-                        </div>
-                    `;
-                })}
-            </div>
-        `;
-    }
+                    '</span>'
+                );
+            })}
+        </div>
+    `;
+}
 
-    renderedCallback() {
-        if (this.finalHtml) {
-            const container = this.template.querySelector('.output-container');
+ renderedCallback() {
+    if (this.finalHtml) {
+        const container = this.template.querySelector('.output-container');
 
-            if (container && container.innerHTML !== this.finalHtml) {
-                container.innerHTML = this.finalHtml;
+        if (container && container.innerHTML !== this.finalHtml) {
+            container.innerHTML = this.finalHtml;
 
-                const icons = container.querySelectorAll('.edit-icon');
+            container.onclick = (event) => {
+                if (event.target.closest('.edit-icon')) {
+                    this.isEditMode = true;
+                    this.pendingEnable = true;
+                }
+            };
+        }
 
-                icons.forEach(icon => {
-                    icon.addEventListener('click', () => {
-                        this.enableAllFields();
-                    });
-                });
-            }
+        if (this.pendingEnable) {
+            this.enableAllFields();
+            this.pendingEnable = false;
         }
     }
+}
 
     enableAllFields() {
         const inputs = this.template.querySelectorAll('.editable-field');
         inputs.forEach(input => input.removeAttribute('disabled'));
     }
 
-    // ✅ SAVE → stays open now
+
     handleSave() {
         const inputs = this.template.querySelectorAll('.editable-field');
         let fieldMap = {};
@@ -171,24 +176,26 @@ export default class dynamicPdfGenerator extends LightningElement {
             recordId: this.recordId,
             fieldValues: fieldMap
         })
+
         .then(() => {
 
-            inputs.forEach(input => input.setAttribute('disabled', true));
+             inputs.forEach(input => input.setAttribute('disabled', true));
 
-            setTimeout(() => {
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Success',
-                        message: 'Your PDF is generated!! Any changes will be reflected in the database.',
-                        variant: 'success',
-                        mode: 'sticky'
-                    })
-                );
+            this.isEditMode = false; 
+        
+             setTimeout(() => {
+                 this.dispatchEvent(
+                        new ShowToastEvent({
+                            title: 'Success',
+                            message: 'Your changes are saved and will be reflected in the database.Click "Generate Documennt" to generate a PDF',
+                            variant: 'success'
+                       })
+                    );
+        },        300);
+})
 
-                // ❌ REMOVED CLOSE FROM HERE
 
-            }, 300);
-        })
+
         .catch(error => {
             this.dispatchEvent(
                 new ShowToastEvent({
@@ -225,15 +232,17 @@ export default class dynamicPdfGenerator extends LightningElement {
         this.dispatchEvent(
             new ShowToastEvent({
                 title: 'Success',
-                message: 'Document generated successfully!',
+                message: 'Document generated successfully! You can find the document in the "Related list" section',
                 variant: 'success'
             })
         );
+        
 
-        // 🔥 ONLY NEW LINE ADDED
         publish(this.messageContext, PDF_CHANNEL, {
             fileUrl: this.fileUrl
         });
+
+          this.dispatchEvent(new CloseActionScreenEvent());
 
     })
     .catch(error => {

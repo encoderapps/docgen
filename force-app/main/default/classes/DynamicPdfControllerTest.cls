@@ -1,22 +1,18 @@
 @isTest
 public class DynamicPdfControllerTest {
 
-    // 🔹 Test Data Setup
     @testSetup
     static void setupData() {
 
-        // Create Template Parent (Assuming Template_ID__c is lookup)
         Template__c temp = new Template__c(Name = 'Sample Template');
         insert temp;
 
-        // Create Template Mapping Output
         Template_Mapping_Output__c mapping = new Template_Mapping_Output__c(
             Template_ID__c = temp.Id,
             Output_HTML__c = '<div>{!Name}</div>'
         );
         insert mapping;
 
-        // Create Account
         Account acc = new Account(
             Name = 'Test Account',
             Phone = '1234567890',
@@ -24,7 +20,6 @@ public class DynamicPdfControllerTest {
         );
         insert acc;
 
-        // Create Contact (Child)
         Contact con = new Contact(
             FirstName = 'Test',
             LastName = 'User',
@@ -34,7 +29,6 @@ public class DynamicPdfControllerTest {
         insert con;
     }
 
-    // 🔹 Test getTemplateByName
     @isTest
     static void testGetTemplateByName() {
 
@@ -46,7 +40,6 @@ public class DynamicPdfControllerTest {
         System.assert(result.contains('{!Name}'));
     }
 
-    // 🔹 Test fetchDynamicRecord
     @isTest
     static void testFetchDynamicRecord() {
 
@@ -69,7 +62,6 @@ public class DynamicPdfControllerTest {
         System.assert(result.containsKey('Account.Phone'));
     }
 
-    // 🔹 Test updateDynamicRecord
     @isTest
     static void testUpdateDynamicRecord() {
 
@@ -91,13 +83,12 @@ public class DynamicPdfControllerTest {
         System.assertEquals('Updated Name', updated.Name);
     }
 
-    // 🔹 Test generateDocument (HTTP Callout Mock)
     @isTest
     static void testGenerateDocument() {
 
         Account acc = [SELECT Id FROM Account LIMIT 1];
 
-        // 🔥 Mock Response
+   
         Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator());
 
         Test.startTest();
@@ -112,7 +103,7 @@ public class DynamicPdfControllerTest {
         System.assert(url.contains('http'));
     }
 
-    // 🔹 HTTP Mock Class
+
     class MockHttpResponseGenerator implements HttpCalloutMock {
         public HTTPResponse respond(HTTPRequest req) {
 
