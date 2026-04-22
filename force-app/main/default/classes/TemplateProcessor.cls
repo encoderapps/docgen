@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 04-21-2026
+ * @last modified on  : 04-22-2026
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class TemplateProcessor {
@@ -15,10 +15,6 @@ public with sharing class TemplateProcessor {
             if (accountId == null || templateId == null || mappingId == null) {
                 throw new AuraHandledException('Please select all fields');
             }
-
-            // ============================
-            // 🔹 FETCH TEMPLATE HTML
-            // ============================
             String html = [
                 SELECT HTML_Structure__c
                 FROM Template__c
@@ -30,9 +26,6 @@ public with sharing class TemplateProcessor {
                 throw new AuraHandledException('Template HTML is empty');
             }
 
-            // ============================
-            // 🔹 EXTRACT OBJECT-FIELD MAP
-            // ============================
             Map<String, Set<String>> objectFieldsMap = new Map<String, Set<String>>();
 
             Matcher m = Pattern.compile('\\{!([a-zA-Z0-9_]+)\\.([a-zA-Z0-9_]+)\\}').matcher(html);
@@ -48,9 +41,7 @@ public with sharing class TemplateProcessor {
                 objectFieldsMap.get(obj).add(field);
             }
 
-            // ============================
-            // 🔹 MERGE DATA FOR EACH OBJECT
-            // ============================
+            
             for (String objName : objectFieldsMap.keySet()) {
 
                 if (objName == 'Account') {
@@ -73,9 +64,6 @@ public with sharing class TemplateProcessor {
                 }
             }
 
-            // ============================
-            // 🔹 SAVE GENERATED OUTPUT
-            // ============================
             Template_Mapping_Output__c rec = new Template_Mapping_Output__c();
 
             rec.Account__c = accountId;
@@ -93,9 +81,7 @@ public with sharing class TemplateProcessor {
         }
     }
 
-    // ============================
-    // 🔹 MERGE PARENT OBJECT DATA (ACCOUNT)
-    // ============================
+    
     private static String mergeParentObjectData(
         String html,
         String objectApiName,
@@ -123,9 +109,7 @@ public with sharing class TemplateProcessor {
         return html;
     }
 
-    // ============================
-    // 🔹 MERGE CHILD OBJECT DATA
-    // ============================
+    
     private static String mergeChildObjectData(
         String html,
         String objectApiName,
@@ -163,6 +147,7 @@ public with sharing class TemplateProcessor {
                     '(?s)' + objectApiName + ' Details.*?<table>.*?</table>',
                     ''
                 );
+                
             } catch (Exception e) {}
         }
 

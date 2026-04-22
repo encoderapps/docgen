@@ -4,32 +4,27 @@
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <customProperties>
         <name>ScreenProgressIndicator</name>
-        <value>
-            <stringValue>{&quot;location&quot;:&quot;top&quot;,&quot;type&quot;:&quot;simple&quot;}</stringValue>
-        </value>
+        <value>{&quot;location&quot;:&quot;top&quot;,&quot;type&quot;:&quot;simple&quot;}</value>
     </customProperties>
     <environments>Default</environments>
     <interviewLabel>Template Mapping List Action {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Template Mapping List Action</label>
+
     <processMetadataValues>
         <name>BuilderType</name>
-        <value>
-            <stringValue>LightningFlowBuilder</stringValue>
-        </value>
+        <value>LightningFlowBuilder</value>
     </processMetadataValues>
     <processMetadataValues>
         <name>CanvasMode</name>
-        <value>
-            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
-        </value>
+        <value>AUTO_LAYOUT_CANVAS</value>
     </processMetadataValues>
     <processMetadataValues>
         <name>OriginBuilderType</name>
-        <value>
-            <stringValue>LightningFlowBuilder</stringValue>
-        </value>
+        <value>LightningFlowBuilder</value>
     </processMetadataValues>
+
     <processType>Flow</processType>
+
     <screens>
         <name>Template_Output_Screen</name>
         <label>Template Output Screen</label>
@@ -38,6 +33,7 @@
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
+
         <fields>
             <name>TemplateOutputHtmlGenerator</name>
             <extensionName>c:templateOutputHtmlGenerator</extensionName>
@@ -45,18 +41,17 @@
             <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>true</isRequired>
             <storeOutputAutomatically>true</storeOutputAutomatically>
+
             <styleProperties>
-                <verticalAlignment>
-                    <stringValue>top</stringValue>
-                </verticalAlignment>
-                <width>
-                    <stringValue>12</stringValue>
-                </width>
+                <verticalAlignment>top</verticalAlignment>
+                <width>12</width>
             </styleProperties>
         </fields>
+
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
     </screens>
+
     <start>
         <locationX>0</locationX>
         <locationY>0</locationY>
@@ -64,7 +59,9 @@
             <targetReference>Template_Output_Screen</targetReference>
         </connector>
     </start>
+
     <status>Active</status>
+
     <variables>
         <name>recordIds</name>
         <dataType>String</dataType>
