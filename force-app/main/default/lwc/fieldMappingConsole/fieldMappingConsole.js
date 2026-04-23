@@ -1,11 +1,12 @@
 import { LightningElement, track } from "lwc";
+import { NavigationMixin } from "lightning/navigation";
 import getAllObjects from "@salesforce/apex/FieldMappingController.getAllObjects";
 import getObjectFields from "@salesforce/apex/FieldMappingController.getObjectFields";
 import getRelatedObjects from "@salesforce/apex/FieldMappingController.getRelatedObjects";
 import saveMappingConfig from "@salesforce/apex/FieldMappingController.saveMappingConfig";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 
-export default class fieldMappingConsole extends LightningElement {
+export default class fieldMappingConsole extends NavigationMixin(LightningElement) {
   @track objectOptions = [];
   @track selectedObject;
   @track allFields = [];
@@ -16,7 +17,10 @@ export default class fieldMappingConsole extends LightningElement {
   @track isRelatedOpen = false;
 
   searchKey = "";
-  
+
+  // 🔥 NEW (Related search)
+  relatedSearchKey = "";
+  relatedFieldSearchMap = {};
 
   isStandardOpen = true;
   isCustomOpen = true;
@@ -26,8 +30,8 @@ export default class fieldMappingConsole extends LightningElement {
   connectedCallback() {
     getAllObjects().then((result) => {
       this.objectOptions = result.map((obj) => ({
-        label: obj,
-        value: obj,
+        label: obj.label,
+        value: obj.apiName,
       }));
     });
   }
@@ -43,12 +47,16 @@ export default class fieldMappingConsole extends LightningElement {
     });
 
     getRelatedObjects({ objectName: this.selectedObject }).then((result) => {
-      this.relatedData = result.map((obj) => ({
-        name: obj,
-        fields: [],
-        isOpen: false,
-      }));
-    });
+  this.relatedData = result.map((obj) => ({
+    name: obj.apiName,   // ✅ API (internal use)
+    label: obj.label,    // ✅ Label (UI display)
+    fields: [],
+    isOpen: false,
+  }));
+
+  this.relatedSearchKey = "";
+  this.relatedFieldSearchMap = {};
+});
   }
 
   // ================= SEARCH =================
@@ -57,13 +65,66 @@ export default class fieldMappingConsole extends LightningElement {
   }
 
   filterList(list) {
-    return list.filter((f) => f.label.toLowerCase().includes(this.searchKey));
+    return list.filter((f) =>
+      f.label.toLowerCase().includes(this.searchKey)
+    );
+  }
+
+  // ================= RELATED SEARCH (NEW) =================
+
+  handleRelatedSearch(event) {
+    this.relatedSearchKey = event.target.value.toLowerCase();
+  }
+
+  handleRelatedFieldSearch(event) {
+    const objName = event.target.dataset.obj;
+    const value = event.target.value.toLowerCase();
+
+    this.relatedFieldSearchMap = {
+      ...this.relatedFieldSearchMap,
+      [objName]: value,
+    };
+  }
+
+  get filteredRelatedData() {
+    return this.relatedData
+      .map((rel) => {
+        let fieldSearch = this.relatedFieldSearchMap[rel.name] || "";
+
+        let filteredFields = rel.fields;
+
+        // 🔍 Filter fields inside object
+        if (fieldSearch) {
+          filteredFields = rel.fields.filter((f) =>
+            f.label.toLowerCase().includes(fieldSearch)
+          );
+        }
+
+        // 🔍 Filter object
+        if (this.relatedSearchKey) {
+          const matchesObject = rel.name
+            .toLowerCase()
+            .includes(this.relatedSearchKey);
+
+          const matchesFields = filteredFields.length > 0;
+
+          if (!matchesObject && !matchesFields) {
+            return null;
+          }
+        }
+
+        return {
+          ...rel,
+          filteredFields: filteredFields,
+        };
+      })
+      .filter((rel) => rel !== null);
   }
 
   // ================= FIELD TYPES =================
   get standardFields() {
     return this.allFields.filter(
-      (f) => f.type !== "REFERENCE" && !f.apiName.endsWith("__c"),
+      (f) => f.type !== "REFERENCE" && !f.apiName.endsWith("__c")
     );
   }
 
@@ -75,7 +136,7 @@ export default class fieldMappingConsole extends LightningElement {
     return this.allFields.filter((f) => f.type === "REFERENCE");
   }
 
-  // ================= VISIBLE LISTS (UPDATED - NO LIMIT) =================
+  // ================= VISIBLE LISTS =================
   get visibleStandardFields() {
     return this.filterList(this.standardFields);
   }
@@ -92,12 +153,15 @@ export default class fieldMappingConsole extends LightningElement {
   toggleStandard() {
     this.isStandardOpen = !this.isStandardOpen;
   }
+
   toggleCustom() {
     this.isCustomOpen = !this.isCustomOpen;
   }
+
   toggleLookup() {
     this.isLookupOpen = !this.isLookupOpen;
   }
+
   toggleRelated() {
     this.isRelatedOpen = !this.isRelatedOpen;
   }
@@ -105,12 +169,15 @@ export default class fieldMappingConsole extends LightningElement {
   get standardIcon() {
     return this.isStandardOpen ? "▼" : "▶";
   }
+
   get customIcon() {
     return this.isCustomOpen ? "▼" : "▶";
   }
+
   get lookupIcon() {
     return this.isLookupOpen ? "▼" : "▶";
   }
+
   get relatedIcon() {
     return this.isRelatedOpen ? "▼" : "▶";
   }
@@ -143,7 +210,7 @@ export default class fieldMappingConsole extends LightningElement {
       JSON.stringify({
         apiName: api,
         parentObject: parent,
-      }),
+      })
     );
   }
 
@@ -160,11 +227,17 @@ export default class fieldMappingConsole extends LightningElement {
     let fieldObj;
 
     if (!data.parentObject) {
-      fieldObj = this.allFields.find((f) => f.apiName === data.apiName);
+      fieldObj = this.allFields.find(
+        (f) => f.apiName === data.apiName
+      );
     } else {
-      let rel = this.relatedData.find((r) => r.name === data.parentObject);
+      let rel = this.relatedData.find(
+        (r) => r.name === data.parentObject
+      );
       if (rel) {
-        fieldObj = rel.fields.find((f) => f.apiName === data.apiName);
+        fieldObj = rel.fields.find(
+          (f) => f.apiName === data.apiName
+        );
       }
     }
 
@@ -172,7 +245,8 @@ export default class fieldMappingConsole extends LightningElement {
 
     const alreadyMapped = this.mappedFields.some(
       (f) =>
-        f.apiName === fieldObj.apiName && f.parentObject === data.parentObject,
+        f.apiName === fieldObj.apiName &&
+        f.parentObject === data.parentObject
     );
 
     if (alreadyMapped) {
@@ -194,13 +268,19 @@ export default class fieldMappingConsole extends LightningElement {
   // ================= DELETE =================
   handleDelete(event) {
     const key = event.currentTarget.dataset.key;
-    this.mappedFields = this.mappedFields.filter((f) => f.uniqueKey !== key);
+    this.mappedFields = this.mappedFields.filter(
+      (f) => f.uniqueKey !== key
+    );
   }
 
   // ================= GENERATE JSON =================
   generateJSON() {
     if (!this.selectedObject) {
-      this.showToast("Error", "Select object first", "error");
+      this.showToast(
+        "Error",
+        "Please select an SObject to generate JSON.",
+        "error"
+      );
       return;
     }
 
@@ -218,7 +298,7 @@ export default class fieldMappingConsole extends LightningElement {
         });
       } else {
         let existingRelated = output.fields.find(
-          (field) => field.apiName === f.parentObject,
+          (field) => field.apiName === f.parentObject
         );
 
         if (!existingRelated) {
@@ -257,9 +337,19 @@ export default class fieldMappingConsole extends LightningElement {
       objectName: this.selectedObject,
       jsonData: this.generatedJSON,
     })
-      .then(() => {
-        this.showToast("Success", "Mapping saved successfully", "success");
-      })
+      .then((recordId) => {
+  this.showToast("Success", "Mapping saved successfully", "success");
+
+  // 🚀 Navigate to created record
+  this[NavigationMixin.Navigate]({
+    type: "standard__recordPage",
+    attributes: {
+      recordId: recordId,
+      objectApiName: "Mapping_Config__c",
+      actionName: "view"
+    }
+  });
+})
       .catch((error) => {
         this.showToast("Error", error.body.message, "error");
       });
@@ -278,7 +368,7 @@ export default class fieldMappingConsole extends LightningElement {
         title,
         message,
         variant,
-      }),
+      })
     );
   }
 }
