@@ -1,46 +1,51 @@
 <template>
     <lightning-card>
-        <div class="slds-text-align_center slds-text-heading_medium slds-p-top_small">
-            Preview PDF
-        </div>
+        <template if:false={isNextClicked}>
+            <div class="slds-p-around_medium">
+                <lightning-combobox
+                    label="Select Template"
+                    value={selectedTemplateId}
+                    options={templateOptions}
+                    onchange={handleTemplateChange}>
+                </lightning-combobox>
 
-        <div class="slds-m-top_large"></div>
+                <div class="slds-m-top_medium slds-align_absolute-center">
+                    <lightning-button
+                        label="Next"
+                        variant="brand"
+                        onclick={handleNext}>
+                    </lightning-button>
+                </div>
+            </div>
+        </template>
 
-       <template if:true={finalHtml}>
+        <template if:true={isNextClicked}>
+            <div
+                class="slds-text-align_center slds-text-heading_medium slds-p-top_small"
+                style="border-bottom: 2px solid #d8dde6; padding-bottom: 6px; margin-bottom: 15px;">
+                Preview PDF
+            </div>
+
             <div class="outer-container">
                 <div class="inner-container output-container" lwc:dom="manual"></div>
             </div>
 
             <div class="slds-align_absolute-center slds-m-top_large">
-                
-                
                 <template if:true={isEditMode}>
-                 <lightning-button 
-                    label="Save" 
-                    variant="brand" 
-                    onclick={handleSave}>
-                </lightning-button>
+                    <lightning-button
+                        label="Save"
+                        variant="brand"
+                        onclick={handleSave}>
+                    </lightning-button>
                 </template>
-              
 
-                
-                <lightning-button 
-                    label="Generate Document" 
+                <lightning-button
+                    label="Generate Document"
                     variant="brand"
                     class="slds-m-left_medium"
                     onclick={handleGenerateDocument}>
                 </lightning-button>
-
-                
-
             </div>
         </template>
-
-        <template if:true={errorMessage}>
-           <div style="color:red; padding:10px;">
-             Error: {errorMessage}
-            </div>
-        </template>
-        
-    </lightning-card> 
+    </lightning-card>
 </template>

@@ -1,47 +1,45 @@
+.main-container {
+    display: flex;
+    flex-direction: column;
+}
+
 .outer-container {
     display: flex;
     justify-content: center;
-    width: 100%;
 }
 
 .inner-container {
     width: 90%;
     max-width: 900px;
+    overflow: auto;
 }
 
-
-
-
-
-.field-row {
+.button-container {
     display: flex;
-    align-items: center;
-    gap: 20px;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
 }
 
-
-.field-label {
-    width: 200px;   /* FIXED width → alignment */
-    font-weight: 600;
-}
-
-
-.field-input-wrapper {
-    display: flex;
+/* editable UI */
+.editable-wrapper {
+    display: inline-flex;
     align-items: center;
     gap: 6px;
 }
 
-
-.field-input-wrapper input {
-    width: 250px;
-}
-
-
-.edit-icon {
+.editable-field {
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    
+}.edit-icon {
     cursor: pointer;
+    color: #00A1E0;;
+    font-size: 16px;
 }
 
-.edit-icon svg {
-    fill: #0176d3;
+.edit-icon:hover {
+    transform: scale(1.2);
+    color: #014486;
 }

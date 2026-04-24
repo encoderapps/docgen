@@ -56,6 +56,17 @@
 		<name>QuickAction</name>
 	</types>
 
+
+	<types>
+    <members>Account</members>
+    <name>CustomObject</name>
+    </types>
+
+    <types>
+        <members>Account.PDF_Link__c</members>
+        <name>CustomField</name>
+    </types>
+
     <types>
         <members>Docgen_Console</members>
         <name>FlexiPage</name>

@@ -1,14 +1,34 @@
 public with sharing class DynamicPdfController {
 
     @AuraEnabled(cacheable=true)
-    public static String getTemplateByName(String templateName) {
-        Template_Mapping_Output__c rec = [
-            SELECT Output_HTML__c
+    public static List<Template__c> getTemplateRecords() {
+        return [
+            SELECT Id, Name
+            FROM Template__c
+            ORDER BY Name
+        ];
+    }
+
+    @AuraEnabled
+    public static Map<String, String> getMappedHtml(Id recordId, Id templateId) {
+
+        List<Template_Mapping_Output__c> mappings = [
+            SELECT 
+                Template_ID__c,
+                Template_ID__r.HTML_Structure__c
             FROM Template_Mapping_Output__c
-            WHERE Template_ID__r.Name = 'Sample Template'
+            WHERE Master_Record_Id__c = :recordId
+            AND Template_ID__c = :templateId
             LIMIT 1
         ];
-        return rec.Output_HTML__c;
+
+        if (mappings.isEmpty()) {
+            throw new AuraHandledException('No "Template Mapping Output" found for this record.');
+        }
+
+        return new Map<String, String>{
+            'structure' => mappings[0].Template_ID__r.HTML_Structure__c
+        };
     }
 
     @AuraEnabled
@@ -119,6 +139,7 @@ public with sharing class DynamicPdfController {
         Map<String, Schema.SObjectField> fieldMap = objType.getDescribe().fields.getMap();
 
         for (String key : fieldValues.keySet()) {
+
             List<String> parts = key.split('\\.');
 
             if (parts.size() == 2 && parts[0] == objectApiName) {
@@ -133,35 +154,51 @@ public with sharing class DynamicPdfController {
         update record;
     }
 
-@AuraEnabled
-public static String generateDocument(
-    Id recordId,
-    String objectApiName,
-    String htmlContent
-) {
+    @AuraEnabled
+    public static String generateDocument(
+        Id recordId,
+        String objectApiName,
+        String htmlContent
+    ) {
 
-    Map<String, Object> requestBody = new Map<String, Object>{
-        'html' => htmlContent
-    };
+        Map<String, Object> requestBody = new Map<String, Object>{
+            'html' => htmlContent
+        };
 
-    String jsonBody = JSON.serialize(requestBody);
+        String jsonBody = JSON.serialize(requestBody);
 
-    HttpRequest req = new HttpRequest();
-    req.setEndpoint('https://30enk4je0l.execute-api.ap-south-1.amazonaws.com/generate-pdf'); 
-    req.setMethod('POST');
-    req.setHeader('Content-Type', 'application/json');
-    req.setBody(jsonBody);
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint('https://30enk4je0l.execute-api.ap-south-1.amazonaws.com/generate-pdf');
+        req.setMethod('POST');
+        req.setHeader('Content-Type', 'application/json');
+        req.setBody(jsonBody);
 
-    Http http = new Http();
-    HttpResponse res = http.send(req);
+        Http http = new Http();
+        HttpResponse res = http.send(req);
 
-    if (res.getStatusCode() != 200) {
-        throw new AuraHandledException('API Error: ' + res.getBody());
+        if (res.getStatusCode() != 200) {
+            throw new AuraHandledException('API Error: ' + res.getBody());
+        }
+
+        Map<String, Object> responseMap =
+            (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+
+        String fileUrl = (String) responseMap.get('file_url');
+
+        if (recordId != null && String.isNotBlank(objectApiName)) {
+
+            Schema.SObjectType objType = Schema.getGlobalDescribe().get(objectApiName);
+
+            if (objType == null) {
+                throw new AuraHandledException('Invalid object');
+            }
+
+            SObject record = objType.newSObject(recordId);
+            record.put('PDF_Link__c', fileUrl);
+
+            update record;
+        }
+
+        return fileUrl;
     }
-
-    
-    Map<String, Object> responseMap =
-        (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
-
-    return (String) responseMap.get('file_url');
-}}
+}

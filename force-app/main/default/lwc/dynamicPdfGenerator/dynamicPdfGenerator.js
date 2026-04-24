@@ -1,56 +1,66 @@
 import { LightningElement, api, track } from 'lwc';
-import getTemplateByName from '@salesforce/apex/DynamicPdfController.getTemplateByName';
+
+import getTemplates from '@salesforce/apex/DynamicPdfController.getTemplateRecords';
+import getMappedHtml from '@salesforce/apex/DynamicPdfController.getMappedHtml';
 import fetchDynamicRecord from '@salesforce/apex/DynamicPdfController.fetchDynamicRecord';
 import updateDynamicRecord from '@salesforce/apex/DynamicPdfController.updateDynamicRecord';
 import generateDocument from '@salesforce/apex/DynamicPdfController.generateDocument';
 
-import { publish, MessageContext } from 'lightning/messageService';
-import PDF_CHANNEL from '@salesforce/messageChannel/pdfMessageChannel__c';
-import { wire } from 'lwc';
-
-import { CloseActionScreenEvent } from 'lightning/actions';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
-export default class dynamicPdfGenerator extends LightningElement {
-
+export default class DynamicPdfGenerator extends LightningElement {
     @api recordId;
     @api objectApiName;
 
+    @track templateOptions = [];
+    @track selectedTemplateId;
+
+    @track isNextClicked = false;
+    @track finalHtml = '';
+    @track fieldRefs = [];
+
     @track isEditMode = false;
 
-    pendingEnable = false;
-    isListenerAttached = false;
-
-    @track finalHtml = '';
-    @track isLoading = true;
-    @track errorMessage = '';
-
-    @track fileUrl;
-
-    templateHtml = '';
-    fieldRefs = [];
-
-    @wire(MessageContext)
-      messageContext;
-
-    connectedCallback() { 
-        this.initialize();
+    connectedCallback() {
+        this.loadTemplates();
     }
 
-    async initialize() {
+    async loadTemplates() {
+        const data = await getTemplates();
+
+        this.templateOptions = data.map(t => ({
+            label: t.Name,
+            value: t.Id
+        }));
+    }
+
+    handleTemplateChange(event) {
+        this.selectedTemplateId = event.detail.value;
+    }
+
+    async handleNext() {
+        if (!this.selectedTemplateId) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Warning',
+                    message: 'Please select a template first',
+                    variant: 'warning'
+                })
+            );
+            return;
+        }
+
         try {
-            const template = await getTemplateByName({ 
-                templateName: 'Sample Account' 
+            this.isNextClicked = true;
+
+            const templateData = await getMappedHtml({
+                recordId: this.recordId,
+                templateId: this.selectedTemplateId
             });
 
-            this.templateHtml = template || '';
+            const templateHtml = templateData.structure;
 
-            if (!this.templateHtml) {
-                this.errorMessage = 'Template not found';
-                return;
-            }
-
-            this.fieldRefs = this.extractFieldReferences(this.templateHtml);
+            this.fieldRefs = this.extractFieldReferences(templateHtml);
 
             const dataMap = await fetchDynamicRecord({
                 objectApiName: this.objectApiName,
@@ -58,117 +68,95 @@ export default class dynamicPdfGenerator extends LightningElement {
                 fieldPaths: this.fieldRefs
             });
 
-            this.finalHtml = this.replaceTemplate(this.templateHtml, dataMap);
+            this.finalHtml = this.replaceTemplate(templateHtml, dataMap);
+
+            setTimeout(() => {
+                this.renderHtml();
+            }, 0);
 
         } catch (error) {
-            this.errorMessage = error?.body?.message || error.message;
-        } finally {
-            this.isLoading = false;
+            console.error('Error in handleNext:', error);
+
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error',
+                    message: error?.body?.message || 'No data found for selected template',
+                    variant: 'error'
+                })
+            );
+
+            this.isNextClicked = false;
+            this.finalHtml = '';
+            this.fieldRefs = [];
         }
     }
 
     extractFieldReferences(template) {
-        const regex = /\{\!\s*([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+){0,2})\s*\}/g;
-        const fields = new Set();
+        const regex = /\{\!\s*([a-zA-Z0-9_.]+)\s*\}/g;
+        let fields = new Set();
         let match;
 
         while ((match = regex.exec(template)) !== null) {
-            let ref = match[1];
-
-            if (!ref.includes('.')) {
-                ref = `${this.objectApiName}.${ref}`;
-            }
-
-            if (ref.split('.').length === 2) {
-                const obj = ref.split('.')[0];
-                if (obj !== this.objectApiName) {
-                    ref = `${this.objectApiName}.${ref}`;
-                }
-            }
-
-            fields.add(ref);
+            fields.add(match[1]);
         }
 
         return Array.from(fields);
     }
 
-   replaceTemplate(template, dataMap) {
-    const regex = /\{\!\s*([a-zA-Z0-9_.]+)\s*\}/g;
+    replaceTemplate(template, dataMap) {
+        const regex = /\{\!\s*([a-zA-Z0-9_.]+)\s*\}/g;
 
-    return `
-        <div>
-            ${template.replace(regex, (match, ref) => {
+        return template.replace(regex, (match, ref) => {
+            let key = ref.includes('.') ? ref : `${this.objectApiName}.${ref}`;
+            const value = dataMap[key] || '';
 
-                let key = ref;
+            return `
+                <span class="editable-wrapper">
+                    <input 
+                        type="text"
+                        class="editable-field"
+                        value="${value}"
+                        data-field="${key}"
+                        disabled
+                    />
+                    <span class="edit-icon">&#9998;</span>
+                </span>
+            `;
+        });
+    }
 
-                if (!ref.includes('.')) {
-                    key = `${this.objectApiName}.${ref}`;
-                }
-
-                if (ref.split('.').length === 2 && ref.split('.')[0] !== this.objectApiName) {
-                    key = ref;
-                }
-
-                const value = this.escapeHTML(dataMap[key] || '');
-
-                return (
-                    '<span style="display:inline-flex; align-items:center; gap:6px;">' +
-
-                        '<input ' +
-                            'type="text" ' +
-                            'class="editable-field" ' +
-                            'value="' + value + '" ' +
-                            'data-field="' + key + '" ' +
-                            'style="width:250px;padding:6px;border:1px solid #ccc;border-radius:4px;margin-left:8px;" ' +
-                            'disabled />' +
-
-                        '<span class="edit-icon" title="Edit" style="cursor:pointer;">' +
-                            '<svg style="width:14px;height:14px;fill:#0176d3;" aria-hidden="true">' +
-                                '<use xlink:href="/_slds/icons/utility-sprite/svg/symbols.svg#edit"></use>' +
-                            '</svg>' +
-                        '</span>' +
-
-                    '</span>'
-                );
-            })}
-        </div>
-    `;
-}
-
- renderedCallback() {
-    if (this.finalHtml) {
+    renderHtml() {
         const container = this.template.querySelector('.output-container');
 
-        if (container && container.innerHTML !== this.finalHtml) {
+        if (container && this.finalHtml) {
             container.innerHTML = this.finalHtml;
 
             container.onclick = (event) => {
-                if (event.target.closest('.edit-icon')) {
-                    this.isEditMode = true;
-                    this.pendingEnable = true;
+                let el = event.target;
+
+                while (el && el !== container) {
+                    if (el.classList?.contains('edit-icon')) {
+                        this.isEditMode = true;
+                        this.enableAllFields();
+                        return;
+                    }
+                    el = el.parentNode;
                 }
             };
         }
-
-        if (this.pendingEnable) {
-            this.enableAllFields();
-            this.pendingEnable = false;
-        }
     }
-}
 
     enableAllFields() {
-        const inputs = this.template.querySelectorAll('.editable-field');
-        inputs.forEach(input => input.removeAttribute('disabled'));
+        this.template.querySelectorAll('.editable-field')
+            .forEach(i => i.removeAttribute('disabled'));
     }
 
-
     handleSave() {
-        const inputs = this.template.querySelectorAll('.editable-field');
         let fieldMap = {};
+        const inputs = this.template.querySelectorAll('.editable-field');
 
-        inputs.forEach(input => {
-            fieldMap[input.dataset.field] = input.value;
+        inputs.forEach(i => {
+            fieldMap[i.dataset.field] = i.value;
         });
 
         updateDynamicRecord({
@@ -176,83 +164,45 @@ export default class dynamicPdfGenerator extends LightningElement {
             recordId: this.recordId,
             fieldValues: fieldMap
         })
-
         .then(() => {
+            this.isEditMode = false;
 
-             inputs.forEach(input => input.setAttribute('disabled', true));
-
-            this.isEditMode = false; 
-        
-             setTimeout(() => {
-                 this.dispatchEvent(
-                        new ShowToastEvent({
-                            title: 'Success',
-                            message: 'Your changes are saved and will be reflected in the database.Click "Generate Documennt" to generate a PDF',
-                            variant: 'success'
-                       })
-                    );
-        },        300);
-})
-
-
-
-        .catch(error => {
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: 'Error',
-                    message: error?.body?.message || 'Something went wrong',
-                    variant: 'error'
-                })
-            );
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Success',
+                message: 'Changes saved!',
+                variant: 'success'
+            }));
         });
     }
 
-    escapeHTML(value) {
-    if (!value) return '';
+    handleGenerateDocument() {
+        const container = this.template.querySelector('.output-container');
+        if (container) {
+            this.finalHtml = container.innerHTML;
+        }
 
-    return value
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
+        generateDocument({
+            recordId: this.recordId,
+            objectApiName: this.objectApiName,
+            htmlContent: this.finalHtml
+        })
+        .then((fileUrl) => {
+            console.log('Generated PDF URL:', fileUrl);
 
-  handleGenerateDocument() {
-
-    generateDocument({
-        recordId: this.recordId,
-        objectApiName: this.objectApiName,
-        htmlContent: this.finalHtml
-    })
-    .then((result) => {
-
-        this.fileUrl = result;
-
-        this.dispatchEvent(
-            new ShowToastEvent({
+            this.dispatchEvent(new ShowToastEvent({
                 title: 'Success',
-                message: 'Document generated successfully! You can find the document in the "Related list" section',
+                message: 'Document generated successfully!',
                 variant: 'success'
-            })
-        );
-        
+            }));
+        })
+        .catch((error) => {
+            console.error('Error:', error);
 
-        publish(this.messageContext, PDF_CHANNEL, {
-            fileUrl: this.fileUrl
-        });
-
-          this.dispatchEvent(new CloseActionScreenEvent());
-
-    })
-    .catch(error => {
-        this.dispatchEvent(
-            new ShowToastEvent({
+            this.dispatchEvent(new ShowToastEvent({
                 title: 'Error',
-                message: error?.body?.message || 'Failed',
+                message: error?.body?.message || 'Failed to generate document',
                 variant: 'error'
-            })
-        );
-    });
-}
+            }));
+        });
+    }
 }
