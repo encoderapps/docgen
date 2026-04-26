@@ -6,11 +6,16 @@ public class FieldMappingControllerTest {
     static void testGetAllObjects() {
 
         Test.startTest();
-        List<String> objects = FieldMappingController.getAllObjects();
+        List<FieldMappingController.ObjectWrapper> objects =
+            FieldMappingController.getAllObjects();
         Test.stopTest();
 
         System.assertNotEquals(null, objects, 'Object list should not be null');
         System.assert(objects.size() > 0, 'Object list should not be empty');
+
+        FieldMappingController.ObjectWrapper obj = objects[0];
+        System.assertNotEquals(null, obj.label, 'Object label should not be null');
+        System.assertNotEquals(null, obj.apiName, 'Object API name should not be null');
     }
 
     // ================= TEST GET OBJECT FIELDS =================
@@ -22,24 +27,25 @@ public class FieldMappingControllerTest {
             FieldMappingController.getObjectFields('Account');
         Test.stopTest();
 
-        System.assertNotEquals(null, fields);
-        System.assert(fields.size() > 0);
+        System.assertNotEquals(null, fields, 'Fields should not be null');
+        System.assert(fields.size() > 0, 'Fields should not be empty');
 
         FieldMappingController.FieldWrapper f = fields[0];
-        System.assertNotEquals(null, f.label);
-        System.assertNotEquals(null, f.apiName);
+        System.assertNotEquals(null, f.label, 'Field label should not be null');
+        System.assertNotEquals(null, f.apiName, 'Field API name should not be null');
+        System.assertNotEquals(null, f.type, 'Field type should not be null');
     }
 
     // ================= TEST GET OBJECT FIELDS - INVALID =================
     @isTest
-    static void testGetObjectFields_Invalid() {
+    static void testGetObjectFieldsInvalid() {
 
         Test.startTest();
         List<FieldMappingController.FieldWrapper> fields =
             FieldMappingController.getObjectFields('');
         Test.stopTest();
 
-        System.assertEquals(0, fields.size());
+        System.assertEquals(0, fields.size(), 'Fields should be empty for invalid object');
     }
 
     // ================= TEST GET RELATED OBJECTS =================
@@ -47,23 +53,29 @@ public class FieldMappingControllerTest {
     static void testGetRelatedObjects() {
 
         Test.startTest();
-        List<String> related =
+        List<FieldMappingController.RelatedObjectWrapper> related =
             FieldMappingController.getRelatedObjects('Account');
         Test.stopTest();
 
-        System.assertNotEquals(null, related);
+        System.assertNotEquals(null, related, 'Related objects should not be null');
+
+        if (!related.isEmpty()) {
+            FieldMappingController.RelatedObjectWrapper obj = related[0];
+            System.assertNotEquals(null, obj.label, 'Related object label should not be null');
+            System.assertNotEquals(null, obj.apiName, 'Related object API name should not be null');
+        }
     }
 
     // ================= TEST GET RELATED OBJECTS - INVALID =================
     @isTest
-    static void testGetRelatedObjects_Invalid() {
+    static void testGetRelatedObjectsInvalid() {
 
         Test.startTest();
-        List<String> related =
+        List<FieldMappingController.RelatedObjectWrapper> related =
             FieldMappingController.getRelatedObjects('');
         Test.stopTest();
 
-        System.assertEquals(0, related.size());
+        System.assertEquals(0, related.size(), 'Related objects should be empty for invalid input');
     }
 
     // ================= TEST SAVE MAPPING CONFIG =================
@@ -79,7 +91,7 @@ public class FieldMappingControllerTest {
         );
         Test.stopTest();
 
-        System.assertNotEquals(null, recordId);
+        System.assertNotEquals(null, recordId, 'Record Id should not be null');
 
         Mapping_Config__c rec = [
             SELECT Id, Source_Object__c, JSON_Structure__c
@@ -88,13 +100,13 @@ public class FieldMappingControllerTest {
             LIMIT 1
         ];
 
-        System.assertEquals('Account', rec.Source_Object__c);
-        System.assertEquals(jsonData, rec.JSON_Structure__c);
+        System.assertEquals('Account', rec.Source_Object__c, 'Source object mismatch');
+        System.assertEquals(jsonData, rec.JSON_Structure__c, 'JSON data mismatch');
     }
 
     // ================= TEST SAVE MAPPING CONFIG - NO OBJECT =================
     @isTest
-    static void testSaveMappingConfig_NoObject() {
+    static void testSaveMappingConfigNoObject() {
 
         Boolean exceptionThrown = false;
 
@@ -104,12 +116,12 @@ public class FieldMappingControllerTest {
             exceptionThrown = true;
         }
 
-        System.assertEquals(true, exceptionThrown, 'Exception should be thrown');
+        System.assertEquals(true, exceptionThrown, 'Exception should be thrown when object is blank');
     }
 
     // ================= TEST SAVE MAPPING CONFIG - NO JSON =================
     @isTest
-    static void testSaveMappingConfig_NoJSON() {
+    static void testSaveMappingConfigNoJson() {
 
         Boolean exceptionThrown = false;
 
@@ -119,7 +131,7 @@ public class FieldMappingControllerTest {
             exceptionThrown = true;
         }
 
-        System.assertEquals(true, exceptionThrown, 'Exception should be thrown');
+        System.assertEquals(true, exceptionThrown, 'Exception should be thrown when JSON is blank');
 
     }
 }

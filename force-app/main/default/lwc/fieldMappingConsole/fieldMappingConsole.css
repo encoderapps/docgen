@@ -6,3 +6,8 @@
     cursor: grab;
 }
 
+/* 🔍 Search bars spacing (safe + minimal) */
+lightning-input {
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
