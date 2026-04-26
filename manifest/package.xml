@@ -39,6 +39,9 @@
 		<members>TemplateGeneratorServiceTest</members>
 		<members>DynamicPdfController</members>
 		<members>DynamicPdfControllerTest</members>
+		<members>BulkDataProcessingBatch</members>
+		<members>TemplateBatchController</members>
+		<members>TemplateProcessor</members>
         <name>ApexClass</name>
     </types>
 
@@ -46,16 +49,21 @@
         <members>fieldMappingConsole</members>
 		<members>templateOutputGenerator</members>
 		<members>dynamicPdfGenerator</members>
+		<members>templateOutputHtmlGenerator</members>
+		<members>templateOutputGenerator</members>
+		<members>templateBatchRunner</members>
         <name>LightningComponentBundle</name>
     </types>
 
 	<types>
 		<members>Account-Account Layout</members>
+		<members>Template_Mapping_Output__c-Template Mapping Output Layout</members>
 		<name>Layout</name>
 	</types>
 
 	<types>
 		<members>Account.Generate_PDF</members>
+		<members>Template_Mapping_Output__c.Generate_Template</members>
 		<name>QuickAction</name>
 	</types>
 
@@ -63,14 +71,10 @@
         <members>Docgen_Console</members>
         <name>FlexiPage</name>
     </types>
-	<types>
-		<members>Template_Mapping_Output__c-Template Mapping Output Layout</members>
-		<name>Layout</name>
-	</types>
-	<types>
-		<members>Template_Mapping_Output__c.Generate_Template</members>
-		<name>QuickAction</name>
-	</types>
     
+	<types>
+		<members>Template_Mapping_List_Action</members>
+		<name>Flow</name>
+	</types>    
 	<version>66.0</version>
 </Package>
