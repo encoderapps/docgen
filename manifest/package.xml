@@ -9,6 +9,7 @@
 		<members>Template_Mapping_Output__c.Output_Html__c</members>
 		<members>Template_Mapping_Output__c.Template_Id__c</members>
 		<members>Template__c.HTML_Structure__c</members>
+		<members>Account.PDF_Link__c</members>
 		<name>CustomField</name>
 	</types>
 	<types>
@@ -55,17 +56,6 @@
 		<members>Account.Generate_PDF</members>
 		<name>QuickAction</name>
 	</types>
-
-
-	<types>
-    <members>Account</members>
-    <name>CustomObject</name>
-    </types>
-
-    <types>
-        <members>Account.PDF_Link__c</members>
-        <name>CustomField</name>
-    </types>
 
     <types>
         <members>Docgen_Console</members>
