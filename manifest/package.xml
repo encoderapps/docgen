@@ -7,18 +7,26 @@
 	<types>
 		<members>Template_Mapping_Output__c.Generate_Template</members>
 		<name>QuickAction</name>
-	</types>-->
+	</types>
+	<types>
+		<members>Template_Mapping_List_Action</members>
+		<name>Flow</name>
+	</types>
     <types>      
 		<members>TemplateGeneratorService</members>
 		<members>TemplateGeneratorServiceTest</members>
-		
+		<members>BulkDataProcessingBatch</members>
+		<members>TemplateBatchController</members>
+		<members>TemplateProcessor</members>
 		<name>ApexClass</name>
 	</types>
     
     <types>
+		<members>templateOutputHtmlGenerator</members>
 		<members>templateOutputGenerator</members>
+		<members>templateBatchRunner</members>
 		<name>LightningComponentBundle</name>
-	</types>-->
+	</types>
 	<version>66.0</version>
 
 </Package>
