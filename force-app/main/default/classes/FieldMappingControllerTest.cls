@@ -1,7 +1,7 @@
 @isTest
 public class FieldMappingControllerTest {
 
-    // ================= TEST GET ALL OBJECTS =================
+    
     @isTest
     static void testGetAllObjects() {
 
@@ -18,7 +18,7 @@ public class FieldMappingControllerTest {
         System.assertNotEquals(null, obj.apiName, 'Object API name should not be null');
     }
 
-    // ================= TEST GET OBJECT FIELDS =================
+    
     @isTest
     static void testGetObjectFields() {
 
@@ -36,7 +36,7 @@ public class FieldMappingControllerTest {
         System.assertNotEquals(null, f.type, 'Field type should not be null');
     }
 
-    // ================= TEST GET OBJECT FIELDS - INVALID =================
+    
     @isTest
     static void testGetObjectFieldsInvalid() {
 
@@ -48,7 +48,7 @@ public class FieldMappingControllerTest {
         System.assertEquals(0, fields.size(), 'Fields should be empty for invalid object');
     }
 
-    // ================= TEST GET RELATED OBJECTS =================
+    
     @isTest
     static void testGetRelatedObjects() {
 
@@ -66,7 +66,7 @@ public class FieldMappingControllerTest {
         }
     }
 
-    // ================= TEST GET RELATED OBJECTS - INVALID =================
+    
     @isTest
     static void testGetRelatedObjectsInvalid() {
 
@@ -78,7 +78,7 @@ public class FieldMappingControllerTest {
         System.assertEquals(0, related.size(), 'Related objects should be empty for invalid input');
     }
 
-    // ================= TEST SAVE MAPPING CONFIG =================
+    
     @isTest
     static void testSaveMappingConfig() {
 
@@ -104,7 +104,7 @@ public class FieldMappingControllerTest {
         System.assertEquals(jsonData, rec.JSON_Structure__c, 'JSON data mismatch');
     }
 
-    // ================= TEST SAVE MAPPING CONFIG - NO OBJECT =================
+    
     @isTest
     static void testSaveMappingConfigNoObject() {
 
@@ -119,7 +119,7 @@ public class FieldMappingControllerTest {
         System.assertEquals(true, exceptionThrown, 'Exception should be thrown when object is blank');
     }
 
-    // ================= TEST SAVE MAPPING CONFIG - NO JSON =================
+    
     @isTest
     static void testSaveMappingConfigNoJson() {
 
