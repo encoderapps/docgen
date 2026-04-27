@@ -1,6 +1,5 @@
 public with sharing class FieldMappingController {
 
-    // ================= WRAPPER CLASSES =================
 
     public class FieldWrapper {
         @AuraEnabled public String label;
@@ -14,13 +13,13 @@ public with sharing class FieldMappingController {
         @AuraEnabled public String apiName;
     }
 
-    // 🔥 NEW WRAPPER FOR RELATED OBJECTS
+
     public class RelatedObjectWrapper {
         @AuraEnabled public String label;
         @AuraEnabled public String apiName;
     }
 
-    // ================= GET ALL OBJECTS =================
+    
     @AuraEnabled(cacheable=true)
     public static List<ObjectWrapper> getAllObjects() {
 
@@ -53,7 +52,7 @@ public with sharing class FieldMappingController {
         return result;
     }
 
-    // ================= GET OBJECT FIELDS =================
+    
     @AuraEnabled(cacheable=true)
     public static List<FieldWrapper> getObjectFields(String objectName) {
 
@@ -104,7 +103,7 @@ public with sharing class FieldMappingController {
         return result;
     }
 
-    // ================= GET RELATED OBJECTS (UPDATED) =================
+    
     @AuraEnabled(cacheable=true)
     public static List<RelatedObjectWrapper> getRelatedObjects(String objectName) {
 
@@ -155,7 +154,7 @@ public with sharing class FieldMappingController {
         return relatedList;
     }
 
-    // ================= SORTERS =================
+
 
     public class FieldWrapperSorter
         implements Comparator<FieldWrapper> {
@@ -175,7 +174,7 @@ public with sharing class FieldMappingController {
         }
     }
 
-    // 🔥 NEW SORTER
+
     public class RelatedObjectSorter
         implements Comparator<RelatedObjectWrapper> {
 
@@ -185,7 +184,7 @@ public with sharing class FieldMappingController {
         }
     }
 
-    // ================= SAVE =================
+    
     @AuraEnabled
     public static String saveMappingConfig(
         String objectName,
